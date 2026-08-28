@@ -1,0 +1,8 @@
+{
+    "name": "certification",
+    "version": "0.0.1",
+    "description": "Hydro certification module",
+    "main": "index.ts",
+    "author": "33DAI&yangrenruiyrr",
+    "license": "AGPL-3.0"
+}

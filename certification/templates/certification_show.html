@@ -1,0 +1,66 @@
+{% import "components/nothing.html" as nothing with context %}
+{% import "components/paginator.html" as paginator with context %}
+{% extends "domain_base.html" %}
+{% block domain_content %}
+<div class="row">
+    <div class="medium-12 columns">
+        <div class="section">
+            <div class="section__header">
+                <h1 class="section__title">{{ _('certification.Show Certified Users') }}</h1>
+            </div>
+            <div class="section__body no-padding">
+                <div data-fragment-id="ranking">
+                    {% if not udocs.length %}
+                    {{ nothing.render(_('certification.No Certified Users')) }}
+                    {% else %}
+                    <table class="data-table">
+                        <colgroup>
+                            <col class="col--uid" style="width:9rem">
+                            <col class="col--flag" style="width:12rem">
+                            <col class="col--name" style="width:12rem">
+                            <col class="col--user">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="col--uid">{{ _('certification.User ID') }}</th>
+                                <th class="col--flag">{{ _('certification.Flag') }}</th>
+                                <th class="col--uid">{{ _('certification.Adder User ID') }}</th>
+                                <th class="col--user">{{ _('certification.User') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {%- for udoc in udocs -%}
+                            <tr>
+                                <td class="col--uid">{{ udoc._id }}</td>
+                                {%- if udoc.certification_flag == 1 -%}
+                                <td> {{ _('certification_1') }} </td>
+                                {%- elif udoc.certification_flag == 2 -%}
+                                <td> {{ _('certification_2') }} </td>
+                                {%- elif udoc.certification_flag == 3 -%}
+                                <td> {{ _('certification_3') }} </td>
+                                {%- elif udoc.certification_flag == 4 -%}
+                                <td> {{ _('certification_4') }} </td>
+                                {%- elif udoc.certification_flag == 5 -%}
+                                <td> {{ _('certification_5') }} </td>
+                                {%- else -%}
+                                <td> {{ _('certification_0') }} </td>
+                                {%- endif -%}
+
+                                <td class="col--uid">
+                                    {{ udoc.certification_adder }}
+                                </td>
+                                <td class="col--user">
+                                    {{ user.render_inline(udoc) }}
+                                </td>
+                            </tr>
+                            {%- endfor -%}
+                        </tbody>
+                    </table>
+                    {{ paginator.render(page, upcount) }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

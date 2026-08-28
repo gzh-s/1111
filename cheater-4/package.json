@@ -1,0 +1,8 @@
+{
+    "name": "cheater",
+    "version": "1.0.0",
+    "main": "index.js",
+    "dependencies": {
+        "schemastery": "^3.16.1"
+    }
+}

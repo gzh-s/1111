@@ -1,0 +1,23 @@
+{% import "components/user.html" as user with context %}
+<tbody data-fragment-id="manage_users-tbody">
+  {%- for udoc in udocs -%}
+  <tr data-uid="{{ udoc._id }}">
+    <td class="col--uid"> {{ udoc._id }} </td>
+    <td class="col--user"> {{ user.render_inline(udoc, badge=false) }} </td>
+    <td class="col--mail"> {{ udoc.mail }} </td>
+    <td class="col--punish_time"> {{ udoc.punishTime }} </td>
+    <td class="col--cheat">
+      {%- if udoc.cheater == true -%}
+        是
+      {%- else -%}
+        否
+      {%- endif -%}
+    </td>
+    <td class="col--unlocktime">{{ datetimeSpan(udoc['unLockTime'])|safe }}</td>
+    <td class="col--actions">
+      <a name="edit_cheater" data-uid="{{ udoc._id }}">{{ _('Edit') }}</a>
+      <a name="cancel_cheater" data-uid="{{ udoc._id }}">{{ _('Cancel') }}</a>
+    </td>
+  </tr>
+  {%- endfor -%}
+</tbody>

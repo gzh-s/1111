@@ -1,0 +1,43 @@
+{% extends "domain_base.html" %}
+{% block domain_content %}
+<div class="row">
+  <div class="medium-12 columns">
+    <div class="section">
+      <div class="section__header">
+        <h1 class="section__title" data-heading>{{ _('Certification') }}</h1>
+      </div>
+      <div class="section__body">
+        <form method="post">
+          {{ form.form_text({
+          label:'By Username / UID',
+          name:'uidOrName',
+          autofocus:true,
+          required:true
+          }) }}
+          {{ form.form_select({
+          label:'Certification',
+          name:'flag',
+          options:{
+          '0': 'certification_0',
+          '1': 'certification_1',
+          '2': 'certification_2',
+          '3': 'certification_3',
+          '4': 'certification_4',
+          '5': 'certification_5'
+          },
+          value: '0'
+          }) }}
+          <div class="row">
+            <div class="columns">
+              <button type="submit" class="rounded primary button">
+                {{ _('Set') }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

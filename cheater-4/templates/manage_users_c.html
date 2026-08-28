@@ -1,0 +1,37 @@
+{% extends "manage_base.html" %}
+{% block manage_content %}
+<div class="section">
+  <div class="section__header">
+    <h1 class="section__title">{{ _('User Management') }}</h1>
+    <div class="section__tools">
+    <button class="primary rounded button" name="select_user"><span class="icon icon-search"></span>{{ _('Select User') }}</button>
+    </div>
+  </div>
+  {{ noscript_note.render() }}
+  <div class="section__body no-padding">
+    <table class="data-table">
+      <colgroup>
+        <col class="col--uid">
+        <col class="col--user">
+        <col class="col--mail">
+        <col class="col--punish_time">
+        <col class="col--cheat">
+        <col class="col--unlocktime">
+        <col class="col--actions">
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col--uid">{{ _('UID') }}</th>
+          <th class="col--user">{{ _('Username') }}</th>
+          <th class="col--mail">{{ _('Email') }}</th>
+          <th class="col--punish_time">{{ _('Punish Time(Day)') }}</th>
+          <th class="col--cheat">{{ _('Cheater') }}</th>
+          <th class="col--unlocktime">{{ _('UnLock Time') }}</th>
+          <th class="col--actions"><span class="icon icon-wrench"></span></th>
+        </tr>
+      </thead>
+      {% include "partials/manage_users_c.html" %}
+    </table>
+  </div>
+</div>
+{% endblock %}
