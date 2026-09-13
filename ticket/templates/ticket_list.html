@@ -1,0 +1,240 @@
+{% extends "layout/basic.html" %}
+{% import "components/nothing.html" as nothing with context %}
+{% import "components/paginator.html" as paginator with context %}
+
+{% block content %}
+<style>
+.section__title {
+    color: #262626;
+    font-weight: 600;
+}
+
+.ticket-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-item {
+    padding: 14px 12px;
+}
+
+.ticket-item:not(:last-child) {
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.ticket-item .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.ticket-item .space-between {
+    justify-content: space-between;
+}
+
+.ticket-item .info {
+    margin-top: 10px;
+}
+
+.ticket-item .left {
+    min-width: 0;
+    flex: 1;
+}
+
+.ticket-item .right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 220px;
+    flex-shrink: 0;
+}
+
+.ticket-item .time{
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.ticket-item .info .right{
+  justify-content: flex-start;
+}
+
+.ticket-item .info .right .time{
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.ticket-item .ticket-info{
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.ticket-item .info .right{
+  gap: 16px; 
+}
+
+.ticket-title {
+    font-size: 16px;
+    color: #404040;
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.ticket-item .title-row {
+  gap: 6px;
+}
+
+.ticket-info {
+    font-size: 14px;
+    color: gray;
+    white-space: nowrap;
+}
+
+.category-row {
+    font-size: 14px;
+    font-weight: bold;
+    color: #57606a;
+    white-space: nowrap;
+}
+
+.user-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.user-row a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.time-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #8c8c8c;
+    white-space: nowrap;
+}
+
+.time-row .icon {
+    font-size: 12px;
+    opacity: .85;
+}
+
+@media (max-width: 640px) {
+    .ticket-item .space-between {
+        align-items: flex-start;
+    }
+
+    .ticket-item .right {
+        min-width: 0;
+        flex-shrink: 1;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+}
+</style>
+
+<div class="row">
+  <div class="medium-9 columns">
+    <div class="section">
+      <div class="section__header">
+        <h1 class="section__title">{{ _('Ticket List') }}</h1>
+        <div class="section__tools">
+          <a href="{{ url('ticket_create') }}" class="ticket-button info-button" style="color: #fff; text-decoration: none;">
+            <span class="icon icon-edit"></span> {{ _('New Ticket') }}
+          </a>
+        </div>
+      </div>
+      <div class="section__body">
+        <form method="get" action="{{ url('ticket_main') }}" class="search-form" style="margin: 0;">
+          <div class="search-input-group">
+            <input type="text" name="q" class="textbox" placeholder="{{ _('ticket title') }}" value="{{ q }}">
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section__body">
+        <div class="ticket-list">
+          {% for tdoc in tdocs %}
+          <div class="ticket-item">
+            <div class="row space-between">
+              <div class="left row">
+                <a href="{{ url('ticket_detail', { tid: tdoc._id }) }}" style="text-decoration: none;" class="ticket-title">{{ tdoc.title }}</a>
+              </div>
+              <div class="right row">
+                <span class="ticket-info">
+                  {% if tdoc.assignee %}
+                    <img class="small user-profile-avatar v-center" loading="lazy" src="{{ avatarUrl(udict[tdoc.assignee].avatar) }}" width="20" height="20">
+                  {% endif %}
+                  #{{ tdoc._id }}
+                </span>
+              </div>
+            </div>
+            <div class="row space-between info">
+              <div class="left row">
+                <span class="category-row">{{ _(tdoc.category) if tdoc.category else _('General') }}</span>
+              </div>
+              <div class="right row">
+                <div class="user-row">{{ user.render_inline(udict[tdoc.owner]) }}</div>
+                <span class="time row title-row ticket-info">
+                  <span class="icon icon-schedule"></span>
+                  {{ _("Updated At") }}
+                  <span class="time">{{ datetimeSpan(tdoc['updateAt'])|safe }}</span>
+                  /
+                  {{ _("Created At") }}
+                  <span class="time">{{ datetimeSpan(tdoc['_id'])|safe }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          {% else %}
+            {{ nothing.render('no ticket found') }}
+          {% endfor %}
+        </div>
+        
+        {{ paginator.render(page, tpcount, qs) }}
+      </div>
+    </div>
+  </div>
+  <div class="medium-3 columns">
+    <div class="section category-filter-sidebar">
+      <div class="section__header">
+        <h1 class="section__title">{{ _('Ticket Category') }}</h1>
+      </div>
+      <div class="section__body">
+          <a href="{{ url('ticket_main', query={status:statusFilter,q:q}) if statusFilter!==-1 else url('ticket_main', query={q:q}) }}" style="text-decoration: none;" class="category-btn {{ 'selected' if not categoryFilter }}">
+            {{ _('All Tickets') }}
+          </a>
+          {% for cat in TicketCategory %}
+          <a href="{{ url('ticket_main', query={status:statusFilter,category:cat,q:q}) if statusFilter!==-1 else url('ticket_main', query={category:cat,q:q}) }}" style="text-decoration: none;" class="category-btn {{ 'selected' if categoryFilter == cat }}">
+            {{ _(cat) }}
+          </a>
+          <div class="category-desc {% if categoryFilter == cat %} active{% endif %}">
+            {% if cat == 'General' %}{{ _('general questions') }}
+            {% elif cat == 'ProblemTopic' %}{{ _('questions about problems') }}
+            {% elif cat == 'Suggestion' %}{{ _('suggestions or bug feedback') }}
+            {% elif cat == 'Report' %}{{ _('report user or content') }}
+            {% elif cat == 'Account' %}{{ _('account-related content') }}
+            {% endif %}
+          </div>
+          {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
