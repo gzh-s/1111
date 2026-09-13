@@ -1,0 +1,115 @@
+{% extends "layout/basic.html" %}
+{% import "components/form.html" as form with context %}
+{% block content %}
+<div class="row">
+  <div class="medium-9 columns">
+    <div class="section">
+      <div class="section__header">
+        <h1 class="section__title">{{ _('Edit Ticket') if tdoc else _('New Ticket') }}</h1>
+      </div>
+      <div class="section__body">
+        <form method="post">
+          <div class="row">
+            <div class="medium-12 columns">
+              <label>
+                {{ _('Title') }}
+                <input name="title" class="textbox" value="{{ tdoc.title }}" required autofocus>
+              </label>
+            </div>
+          </div>
+          <input type="hidden" name="category" id="category-input" value="{{ tdoc.category }}" required>
+          {{ form.form_textarea({
+            columns: 12,
+            label: _('Content'),
+            name: 'content',
+            value: tdoc.content,
+            markdown: true,
+            required: true,
+            extra_style: 'height: 400px; margin-top: 0;'
+          }) }}
+          <input type="hidden" name="operation" value="{{ 'update' if tdoc else 'create' }}">  
+          <div class="row">
+            <div class="medium-12 columns">
+              <button type="submit" class="primary rounded button">{{ _('Submit') }}</button>
+              <button type="button" class="rounded button" onclick="window.history.go(-1)">
+                {{ _('Cancel') }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="medium-3 columns">
+    <div class="section">
+      <div class="section__header">
+        <h1 class="section__title">{{ _('Ticket Category') }}</h1>
+      </div>
+      <div class="section__body">
+        <div id="category-list">
+          {% for cat in TicketCategory %}
+          <button type="button" class="category-btn {{ 'selected' if tdoc.category == cat }}" data-value="{{ cat }}" onclick="selectCategory('{{ cat }}')">
+            {{ _(cat) }}
+          </button>
+          <div class="category-desc" id="desc-{{ cat }}">
+            {% if cat == 'General' %}{{ _('general questions') }}
+            {% elif cat == 'ProblemTopic' %}{{ _('questions about problems') }}
+            {% elif cat == 'Suggestion' %}{{ _('suggestions or bug feedback') }}
+            {% elif cat == 'Report' %}{{ _('report user or content') }}
+            {% elif cat == 'Account' %}{{ _('account-related content') }}
+            {% else %}{{ _('select this category') }}{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <div id="category-error" style="color: #cf222e; font-size: 15px; margin-top: 8px; display: none;">
+          {{ _('Please select a category') }}
+        </div>
+      </div>
+    </div>
+    {% if tdoc and handler.user.hasPriv(PRIV.PRIV_EDIT_SYSTEM) %}
+      <div class="section">
+        <div class="section__header">
+          <h1 class="section__title">{{ _('Action') }}</h1>
+        </div>
+        <div class="section__body">
+            <form method="post" action="{{ url('ticket_edit', { tid: tdoc._id }) }}" onsubmit="return confirm('确定删除吗？删除后将无法找回')" style="display:inline">
+              <button type="submit" name="operation" value="delete" class="ticket-button warning-button">
+                <span class="icon icon-delete">删除工单</span>
+              </button>
+            </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function selectCategory(cat) {
+  document.getElementById('category-input').value = cat;
+  document.querySelectorAll('.category-btn').forEach(el => {
+    if (el.dataset.value === cat) el.classList.add('selected');
+    else el.classList.remove('selected');
+  });
+  document.querySelectorAll('.category-desc').forEach(el => el.classList.remove('active'));
+  const desc = document.getElementById('desc-' + cat);
+  if (desc) desc.classList.add('active');
+  document.getElementById('category-error').style.display = 'none';
+}
+
+{% if tdoc and tdoc.category %}
+  document.addEventListener('DOMContentLoaded', () => {
+    const desc = document.getElementById('desc-{{ tdoc.category }}');
+    if (desc) desc.classList.add('active');
+  });
+{% endif %}
+
+document.querySelector('form').addEventListener('submit', function(e) {
+  const cat = document.getElementById('category-input').value;
+  if (!cat && e.submitter && e.submitter.name !== 'operation') {
+    e.preventDefault();
+    document.getElementById('category-error').style.display = 'block';
+    document.querySelector('.medium-3').scrollIntoView({ behavior: 'smooth' });
+  }
+});
+</script>
+{% endblock %}

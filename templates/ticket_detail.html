@@ -1,0 +1,507 @@
+{% extends "layout/basic.html" %}
+{% import "components/user.html" as user with context %}
+{% import "components/form.html" as form with context %}
+
+{% block content %}
+
+<style>
+.ticket-header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid #d0d7de;
+    padding-bottom: 8px;
+}
+
+.ticket-title {
+    font-size: 32px;
+    font-weight: 400;
+    margin: 0;
+    color: #1f2328;
+}
+
+.ticket-id {
+    font-weight: 300;
+    color: #656d76;
+    margin-right: 8px;
+}
+
+.section__title {
+    color: #262626;
+    font-weight: 600;
+}
+
+/* Sidebar styling */
+.ticket-sidebar {
+    padding: 4px;
+}
+
+.ticket-sidebar .sidebar-item {
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-sidebar .sidebar-label {
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.ticket-sidebar .sidebar-value {
+    text-align: right;
+}
+
+.status-1 {
+    color: rgb(19, 194, 194);
+    font-weight: bold;
+}
+
+/* Open */
+.status-2 {
+    color: rgb(255, 193, 22);
+    font-weight: bold;
+}
+
+/* Processing */
+.status-3 {
+    color: rgb(243, 156, 17);
+    font-weight: bold;
+}
+
+/* Waiting for User */
+.status-4 {
+    color: rgb(191, 191, 191);
+    font-weight: bold;
+}
+
+/* Suspended */
+.status-5 {
+    color: rgb(82, 196, 26);
+    font-weight: bold;
+}
+
+/* Resolved */
+.status-6 {
+    color: rgb(231, 76, 60);
+    font-weight: bold;
+}
+
+/* Closed */
+
+.timeline {
+    margin-left: 16px;
+    padding-left: 16px;
+    border-left: 2px solid #d0d7de;
+    position: relative;
+    padding-bottom: 24px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+/* User Reply Card */
+.user-reply-card {
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    position: relative;
+    background-color: #ffffff;
+}
+
+.user-reply-card::before,
+.user-reply-card::after {
+    content: ' ';
+    position: absolute;
+    top: 11px;
+    right: 100%;
+    left: -8px;
+    height: 0;
+    width: 0;
+    pointer-events: none;
+    border: solid transparent;
+    border-right-color: #d0d7de;
+    border-width: 8px;
+    margin-top: -8px;
+}
+
+.user-reply-card::after {
+    border-right-color: #f6f8fa;
+    border-width: 7px;
+    margin-top: -7px;
+    left: -7px;
+}
+
+.reply-card-header {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    color: #57606a;
+    font-size: 14px;
+}
+
+.reply-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #24292f;
+}
+
+.reply-time {
+    color: #57606a;
+    font-weight: 400;
+    font-size: 0.9em;
+}
+
+.reply-card-body {
+    padding: 16px;
+    background-color: #ffffff;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    color: #1f2328;
+}
+
+/* System Event */
+.timeline-item.system-event {
+    margin: 16px 0 16px 0;
+    padding-left: 24px;
+    position: relative;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.system-event-icon {
+    position: absolute;
+    left: -25px;
+    width: 16px;
+    height: 16px;
+    background-color: #d0d7de;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #57606a;
+    border: 4px solid #fff;
+    box-sizing: content-box;
+}
+
+.system-event-icon .icon {
+    font-size: 10px;
+}
+
+.system-event-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex-wrap: wrap;
+    color: #57606a;
+    font-size: 13px;
+}
+
+.system-event-content .action-text,
+.system-event-content .old-title,
+.system-event-content .new-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.system-event-content .time {
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+/* Editor Form */
+.reply-form-container {
+    margin-top: 24px;
+    border-top: 1px solid #d0d7de;
+    padding-top: 24px;
+}
+
+.reply-form-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 400;
+    color: #24292e;
+}
+
+.section--transparent {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.section--transparent .section__body {
+    padding: 0 !important;
+}
+
+.ticket-content-box {
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    background-color: #fff;
+}
+
+.ticket-content-header {
+    background-color: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+    padding: 8px 16px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text-gray {
+    color: #ccc;
+}
+</style>
+
+<div class="row">
+  <div class="medium-12 columns">
+    <div class="ticket-header">
+       <h1 class="ticket-title">
+        <span class="ticket-id">#{{ tdoc._id }}</span>- {{ tdoc.title }}
+       </h1>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="medium-9 columns">
+    <div class="section ticket-content-box">
+      <div class="section__header ticket-content-header">
+        <h2 class="section__title">{{ _('Ticket Content') }}</h2>
+      </div>
+      <div class="section__body">
+        <div class="typo">
+          <div class="ticket-content markdown-body">
+            {{ tdoc.content|markdown|safe }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section section--transparent">
+      <div class="section__body">
+        <div class="timeline">
+          {% for tpdoc in tpdocs %}
+            {% if tpdoc.isSystem %}
+              <div class="timeline-item system-event">
+                <div class="system-event-icon">
+                  <span class="icon icon-info"></span>
+                </div>
+                <div class="system-event-content">
+                  {{ user.render_inline(udict[tpdoc.operator]) }}
+                  {% if tpdoc.operation == 'assigned' %}
+                    {% if tpdoc.target == tpdoc.operator %}
+                      <span class="action-text">{{ _('self-assigned this ticket') }}</span>
+                    {% else %}
+                      <span class="action-text">{{ _('assigned this ticket to') }}</span>
+                      {{ user.render_inline(udict[tpdoc.target]) }}
+                    {% endif %}
+                  {% elif tpdoc.operation == 'status_changed' %}
+                      {% set statusMap = {
+                        '1': _("Open"), '2': _("Processing"), '3': _("Waiting for User"),
+                        '4': _("Suspended"), '5': _("Resolved"), '6': _("Closed")
+                      } %}
+                      <span class="action-text">{{ _('changed ticket status to') }}</span>
+                      <span class="status-{{ tpdoc.data.to }}">{{ statusMap[tpdoc.data.to] }}</span>
+                  {% elif tpdoc.operation == 'category_changed' %}
+                      <span class="action-text">
+                        {{ _('changed ticket category to') }}
+                        <span style="color: rgb(52, 152, 219); font-weight: bold;">{{ _(tpdoc.data.to) }}</span>
+                      </span>
+                  {% elif tpdoc.operation == 'title_changed' %}
+                      <span class="action-text">
+                        {{ _('changed ticket title from') }}
+                        <b class="old-title">{{ tpdoc.data.from }}</b>
+                        {{ _('changed ticket title to') }}
+                        <b class="new-title">{{ tpdoc.data.to }}</b>
+                      </span>
+                  {% elif tpdoc.operation == 'ticket_changed' %}
+                      <span class="action-text">{{ _('changed ticket') }}</span>
+                  {% elif tpdoc.operation == 'ticket_reopened' %}
+                      <span class="action-text status-5">{{ _('reopened ticket') }}</span>
+                  {% elif tpdoc.operation == 'ticket_closed' %}
+                      <span class="action-text status-6">{{ _('closed ticket') }}</span>
+                  {% endif %}
+                  <span class="time">{{ datetimeSpan(tpdoc['_id'])|safe }}</span>
+                </div>
+              </div>
+            {% else %}
+              <div class="timeline-item user-reply-card">
+                <div class="reply-card-header">
+                  <div class="reply-user">
+                    {{ user.render_inline(udict[tpdoc.owner]) }}
+                    <span class="reply-time">{{ _('Replied at') }} {{ datetimeSpan(tpdoc['_id'])|safe }}</span>
+                  </div>
+                  {% if handler.user.hasPriv(PRIV.PRIV_EDIT_SYSTEM)%}
+                  <div class="reply-tools">
+                    <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}" onsubmit="return confirm('{{ _('Confirm Delete?') }}')" style="display:inline">
+                      <input type="hidden" name="tpid" value="{{ tpdoc._id }}">
+                      <button type="submit" name="operation" value="delete_reply" class="text-button text-red">
+                        <span class="icon icon-delete">删除</span>
+                      </button>
+                    </form>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="reply-card-body markdown-body">
+                  {{ tpdoc.content|markdown|safe }}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        
+        <div class="reply-form-container" style="border:none; padding: 0;">
+          <h3 class="reply-form-title">{{ _('Reply') }}</h3>
+          <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+            {{ form.form_textarea({
+              columns:12,
+              name:'content',
+              markdown:true,
+              extra_style:'height: 200px',
+              placeholder:_('Leave a comment')
+            }) }}
+            <input type="hidden" name="operation" value="reply">  
+            <button type="submit" class="primary rounded button" style="margin-top: 10px">{{ _('Comment') }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<div class="medium-3 columns">
+    <div class="section ticket-sidebar">
+      <div class="section__header">
+        <h2 class="section__title">{{ _('Ticket Info') }}</h2>
+      </div>
+      <div class="section__body">
+        <div class="sidebar-item">
+           <div class="sidebar-label">{{ _('Ticket Status') }}</div>
+           <div class="sidebar-value">
+              <span class="status-{{ tdoc.status }}">
+                 {% if tdoc.status == 1 %}{{ _('Open') }}{% endif %}
+                 {% if tdoc.status == 2 %}{{ _('Processing') }}{% endif %}
+                 {% if tdoc.status == 3 %}{{ _('Waiting for User') }}{% endif %}
+                 {% if tdoc.status == 4 %}{{ _('Suspended') }}{% endif %}
+                 {% if tdoc.status == 5 %}{{ _('Resolved') }}{% endif %}
+                 {% if tdoc.status == 6 %}{{ _('Closed') }}{% endif %}
+              </span>
+           </div>
+        </div>
+        
+        <div class="sidebar-item">
+           <div class="sidebar-label">{{ _('Creator') }}</div>
+           <div class="sidebar-value">
+             {{ user.render_inline(udoc) }}
+           </div>
+        </div>
+
+        <div class="sidebar-item">
+            <div class="sidebar-label">{{ _('Assignee') }}</div>
+            <div class="sidebar-value">
+              {% if tdoc.assignee %}
+                {{ user.render_inline(udict[tdoc.assignee]) }}
+              {% else %}
+                <span class="text-gray">{{ _('None') }}</span>
+              {% endif %}
+            </div>
+        </div>
+
+        <div class="sidebar-item">
+           <div class="sidebar-label">{{ _('Ticket Category') }}</div>
+           <div class="sidebar-value">{{ _(tdoc.category) if tdoc.category else _('None') }}</div>
+        </div>
+        
+
+        <div class="sidebar-item">
+            <div class="sidebar-label">{{ _('Created At') }}</div>
+            <div class="sidebar-value">{{ datetimeSpan(tdoc['_id'])|safe }}</div>
+        </div>
+        
+         <div class="sidebar-item">
+            <div class="sidebar-label">{{ _('Updated At') }}</div>
+            <div class="sidebar-value">{{ datetimeSpan(tdoc['updateAt'])|safe }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section ticket-sidebar">
+      <div class="section__header">
+        <h2 class="section__title">{{ _('Ticket Action') }}</h2>
+      </div>
+      <div class="section__body">
+        <div class="sidebar-actions">
+          {% if handler.user.hasPerm(perm.PERM_EDIT_DOMAIN) or tdoc.assignee == handler.user._id or handler.user.own(tdoc) %}
+            <a class="ticket-button info-button" style="color: #fff; text-decoration: none;" href="{{ url('ticket_edit', { tid: tdoc._id }) }}">{{ _('Edit Ticket') }}</a>
+            <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+              <input type="hidden" name="operation" value="set_status">
+              <button type="submit" name="status" value="6" class="ticket-button warning-button">{{ _('Close Ticket') }}</button>
+            </form>
+          {% endif %}
+          {% if handler.user.hasPerm(perm.PERM_EDIT_DOMAIN) and not tdoc.assignee or handler.user.hasPriv(PRIV.PRIV_EDIT_SYSTEM) %}
+            <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+              <button type="submit" name="operation" value="claim" class="ticket-button success-button">{{ _('Claim Ticket') }}</button>
+            </form>
+          {% endif %}
+
+          {% if handler.user.hasPerm(perm.PERM_EDIT_DOMAIN) or tdoc.assignee == handler.user._id %}
+            <hr>
+            <h3 class="section__title">{{ _('set ticket status') }}</h3>
+            {% if tdoc.status != 6 %}
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="4" class="ticket-button info-button">{{ _('Suspend') }}</button>
+              </form>
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="3" class="ticket-button info-button">{{ _('Waiting') }}</button>
+              </form>
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="1" class="ticket-button info-button">{{ _('Open') }}</button>
+              </form>
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="2" class="ticket-button process-button">{{ _('Processing') }}</button>
+              </form>
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="5" class="ticket-button success-button">{{ _('Resolved') }}</button>
+              </form>
+            {% else %}
+              <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}">
+                <input type="hidden" name="operation" value="set_status">
+                <button type="submit" name="status" value="2" class="ticket-button success-button">{{ _('Reopen Ticket') }}</button>
+              </form>          
+            {% endif %}
+          {% endif %}
+          {% if handler.user.hasPriv(PRIV.PRIV_EDIT_SYSTEM) %}
+            <hr>
+            <form method="post" action="{{ url('ticket_detail', { tid: tdoc._id }) }}" style="margin-top: 10px;">
+              <div class="input-group">
+                <input type="text" name="uidOrName" class="textbox" placeholder="UID/Name" autocomplete="off">
+                <button type="submit" name="operation" value="assign" class="ticket-button info-button">{{ _('Assign to') }}</button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
